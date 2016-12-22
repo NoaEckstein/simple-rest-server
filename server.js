@@ -2,7 +2,7 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
-var events = require('./EventsRecommended.js');
+var events = require('./EventsRecommended.js').events;
 
 
 const app = express();
@@ -30,9 +30,7 @@ app.get('/', (req, res) => {
               isRead: false}
               ];
 
-// *** REST API ***
-
-
+// *** REST API  for Emails***
 
 
 // LIST
@@ -84,4 +82,49 @@ function findNextId() {
     return maxId + 1;
 }
 
+// *** REST API FOR EVENTS***
+
+
+// LIST
+app.get('/event', (req, res) => {
+  //   setTimeout(()=>res.json(items), 2000);
+  res.json(events);
+})
+
+// READ
+app.get('/event/:id', (req, res) => {
+  const id = req.params.id;
+  const event = events.find(currEvent => currEvent.id === id);
+  res.json(event)
+})
+
+// DELETE
+app.delete('/event/:id', (req, res) => {
+  const id = req.params.id;
+  events = events.filter(currEvent => currEvent.id !== id);
+  res.json({ msg: 'Deleted' });
+})
+
+// CREATE
+app.post('/event', (req, res) => {
+  const event = req.body;
+  event.id = findNextIdEvent();
+  events.push(event);
+  res.json({ msg: 'Event was added!' });
+})
+
+// UPDATE
+app.put('/event', (req, res) => {
+  const event = req.body;
+  events = events.map(currEvent => (currEvent.id === event.id) ? event : currEvent);
+  res.json({ msg: 'Event was updated!' });
+})
+
+function findNextIdEvent() {
+  var maxId = 0;
+  events.forEach(event => {
+    if (event.id > maxId) maxId = event.id;
+  });
+  return maxId + 1;
+}
 
